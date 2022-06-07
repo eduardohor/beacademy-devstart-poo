@@ -8,16 +8,27 @@ use App\Controller\ErrorController;
 
 $url = $_SERVER['REQUEST_URI'];
 
-if ($url === '/') {
-    $c = new IndexController();
-    $c->indexAction();
-} elseif ($url === '/login') {
-    $c = new IndexController();
-    $c->loginAction();
-} elseif ($url === '/produtos') {
-    $p = new ProductController();
-    $p->listAction();
-} else {
-    $e = new ErrorController;
-    $e->notFoundAction();
+function createRouter(string $controllerName, string $methodName)
+{
+    return [
+        'controller' => $controllerName,
+        'method' => $methodName
+    ];
 }
+
+$routes = [
+    '/' => createRouter(IndexController::class, 'indexAction'),
+    '/produtos' => createRouter(ProductController::class, 'listAction'),
+    '/produto-novo' => createRouter(ProductController::class, 'addAction')
+];
+
+if (false === isset($routes[$url])) {
+    (new ErrorController())->notFoundAction();
+    exit;
+}
+
+$controllerName = $routes[$url]['controller'];
+$methodName = $routes[$url]['method'];
+
+
+(new $controllerName())->$methodName();
